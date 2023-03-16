@@ -2,6 +2,7 @@
 	import Cell from './Cell.svelte';
 	import ColumnHeader from './ColumnHeader.svelte';
 	import RowHeader from './RowHeader.svelte';
+	import { createSheet, getColumnName, getRowIndex } from './sheet';
 
 	let numOfCols = 26;
 	let numOfRows = 50;
@@ -12,6 +13,8 @@
 	// 	column: 0,
 	// 	row: 1
 	// };
+
+	const sheet = createSheet({ numOfRows, numOfColumns: numOfCols });
 </script>
 
 <!-- style directive, style:<var>=value -->
@@ -46,34 +49,34 @@
 			<!-- column index prefixed with characters -->
 			<!-- String.fromCharCode('A'.charCodeAt(0)) == 'A'
 			String.fromCharCode('A'.charCodeAt(0)+1) == 'B' -->
-			{@const colName = String.fromCharCode('A'.charCodeAt(0) + column)}
+			{@const colName = getColumnName(column)}
 			{#each { length: numOfRows } as _, row}
 				<!-- row index starts at 1 -->
-				{@const rowIndex = row + 1}
-
+				{@const rowIndex = getRowIndex(row)}
+				{@const cellName = colName + rowIndex}
 				<!-- 
 					if activeCell is not null and is current column and current row, then true 
 					catch data received on custom event 'select', to get current column and current row
 				-->
 				<Cell
+					cell={sheet.get(cellName)}
 					{row}
 					{column}
 					active={activeCell?.column === column && activeCell?.row === row}
 					on:select={() => {
 						activeCell = { column, row };
 					}}
-					value={`${colName}-${rowIndex}`}
 				/>
 			{/each}
 		{/each}
 
 		{#each { length: numOfCols } as _, column}
-			{@const colName = String.fromCharCode('A'.charCodeAt(0) + column)}
+			{@const colName = getColumnName(column)}
 			<ColumnHeader active={activeCell?.column === column} {column} value={colName} />
 		{/each}
 
 		{#each { length: numOfRows } as _, row}
-			{@const rowIndex = String(row + 1)}
+			{@const rowIndex = String(getRowIndex(row))}
 			<RowHeader active={activeCell?.row === row} {row} value={rowIndex} />
 		{/each}
 	</div>
